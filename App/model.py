@@ -29,7 +29,8 @@ from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import shellsort as sa 
-from DISClib.Algorithms.Sorting import mergesort as ms
+from DISClib.Algorithms.Sorting import mergesort as ms 
+import pandas as pd
 assert cf
 
 """
@@ -53,24 +54,34 @@ def newCatalog():
                "nationality": None,
                }
 
-    catalog['artworks'] = lt.newList('SINGLE_LINKED', compareArtworks)
+    catalog['artworks'] = lt.newList('ARRAY_LIST', compareArtworks)
 
-    catalog['artists'] = lt.newList('SINGLE_LINKED', compareArtists)
-
-    catalog['medium'] = mp.newMap(34500,
+    catalog['artists'] = mp.newMap(2000,
                                 maptype='PROBING',
-                                loadfactor=0.3,
+                                loadfactor=0.5,
+                                comparefunction=None)
+
+    catalog['names'] = mp.newMap(2000,
+                                maptype='PROBING',
+                                loadfactor=0.5,
+                                comparefunction=None)
+
+    catalog['department'] = mp.newMap(34500,
+                                maptype='CHAINIING',
+                                loadfactor=2,
                                 comparefunction=None)
 
     catalog["nationality"] = mp.newMap(34500,
                                 maptype='CHAINING',
                                 loadfactor=2,
-                                comparefunction=None)   
+                                comparefunction=None)  
+
  
     return catalog
 
 
 # Funciones para agregar informacion al catalogo
+
 
 def addArtWork(catalog, artwork):
     """
@@ -78,20 +89,30 @@ def addArtWork(catalog, artwork):
     """
     lt.addLast(catalog['artworks'], artwork)
 
+def addName(catalog, artist):
+    artists =  catalog['names']
+    artistName =  artist['DisplayName']
+    if not mp.contains(artists,artistName) and artistName != '':
+        mp.put(artists, artistName,artist)
+
 def addArtist(catalog, artist):
     """
         Añade artistas
     """
-    lt.addLast(catalog["artists"], artist)
+    artists =  catalog['artists']
+    artistCode =  artist['ConstituentID']
+    if not mp.contains(artists,artistCode):
+        mp.put(artists, artistCode,artist)
 
-def addMedium(mediums, artwork):
+
+def addDepartment(departments, artwork):
     """
     Añade mediums al mapa de Mediums y agrega artworks a una lista que tiene como valor
     """
-    mediumName = artwork['Medium']
-    if mp.contains(mediums, mediumName) == False:
-        mp.put(mediums, mediumName, lt.newList('ARRAY_LIST', None))
-    art = onlyMapValue(mediums,mediumName)
+    departmentName = artwork['Department']
+    if not mp.contains(departments, departmentName):
+        mp.put(departments, departmentName, lt.newList('ARRAY_LIST', None))
+    art = onlyMapValue(departments,departmentName)
     lt.addLast(art, artwork)
 
 def addNationality(nationalities, artists, artwork):
@@ -116,6 +137,86 @@ def addNationality(nationalities, artists, artwork):
 # Funciones para creacion de datos
 
 # Funciones de consulta
+
+
+def artworksByArtist(catalog, info):
+    consID =  info['ConstituentID']
+    artworksList = getArtWorksList(catalog['artworks'], consID)
+    tecs = (mp.keySet(artworksList))
+    list =  lt.newList('ARRAY_LIST', None)
+    leng = 0
+    for pos in range(0,lt.size(tecs)+1):
+        temp =  lt.getElement(tecs, pos)
+        size = lt.size(onlyMapValue(artworksList, temp))
+        tup = temp, size
+        if lt.isPresent(list, tup) == 0:
+            lt.addLast(list, tup)
+            leng += size
+    ms.sort(list,compareAlf)
+    ms.sort(list, compareCont)
+    artworks =  onlyMapValue(artworksList, lt.firstElement(list)[0])
+    
+    stri = crearStr(artworksList,consID, leng, list )
+    
+    artStr = {}
+    for pos in range(1,lt.size(artworks)+1):
+        temp =  lt.getElement(artworks, pos)
+        artStr[pos] = temp['ObjectID'],temp['Title'],temp['Medium'], temp['Date'],temp['DateAcquired'],temp['Department'],temp['Classification'], temp['URL'] 
+    data = pd.DataFrame.from_dict(artStr, orient= 'index', columns=['ObjaectID', 'Title', 'Medium', 'Date', 'DateAcquired', 'Department', 'Classification', 'URL' ])
+    return stri, data
+
+def crearStr(map,consID, leng, medium ):
+    temp = medium
+    stri = 'Louise Bourgeois con id de MoMa %s tiene %s obras a su nombre en el museo\n' %(consID, leng)
+    stri += 'Hay %s diferentes medios/tecnicas en su trabajo\n' %(mp.size(map))
+    stri += 'Medio/Tecnica' + 31 * ' ' + 'Conteo\n'
+    for pos in range(1, 6):
+        temp = lt.getElement(medium ,pos)
+        stri +=  temp[0] +   ' '* (50 - (len(temp[0] + str(temp[1])))) + str(temp[1]) + '\n'
+        
+    stri += 'Tres ejemplos de %s en la coleccion son:' %(lt.firstElement(medium )[0])
+    return stri
+
+def compareAlf(item1, item2):
+    if item1[0] > item2[0]:
+        return True
+    else:
+        return False
+
+def compareCont(item1, item2):
+    #Compara cual de los dos conteos es mayor (Se utiliza para ordenar las nacionalidades)
+    if item1[1] > item2[1]:
+        return True
+    else:
+        return False
+
+def getArtWorksList(artworks , consID):
+    map = mp.newMap(15223,
+                    maptype='PROBING',
+                    loadfactor=0.5,
+                    comparefunction=None)
+    
+    size = lt.size(artworks)
+    for pos in range(1, size+1):
+        temp = lt.getElement(artworks,pos)
+        new = temp['ConstituentID'].split(',')
+        for item in new:
+            if item.strip().strip('[').strip(']')  ==  consID:
+                addMedium(map, temp)
+                break
+
+    return map
+    
+def addMedium(mediums, artwork):
+    """
+    Añade mediums al mapa de Mediums y agrega artworks a una lista que tiene como valor
+    """
+    mediumName = artwork['Medium']
+    if not mp.contains(mediums, mediumName):
+        mp.put(mediums, mediumName, lt.newList('ARRAY_LIST', None))
+    art = onlyMapValue(mediums,mediumName)
+    lt.addLast(art, artwork)
+
 
 def onlyMapValue(map, key):
     """
@@ -154,6 +255,98 @@ def getNationalityArtworksNumber(nationalities,nationality): #TODO: Funcion temp
         result = lt.size(temp["value"])
     return result
     
+
+def getArtworkByDep(catalog, department):
+    artworks = onlyMapValue(catalog['department'], department)
+    return artworks
+
+def getCost(artworks, artists, department):
+    list =  lt.newList('ARRAY_LIST', None)
+    total = 0
+    peso = 0
+    for pos in range(1, lt.size(artworks)+1):
+        temp = lt.getElement(artworks,pos)
+        dimensions =  temp["Height (cm)"],temp["Width (cm)"], temp["Depth (cm)"], temp["Weight (kg)"]
+        price = calCost(dimensions)
+        total += price
+        if temp["Weight (kg)"] != '':
+            peso += float(temp["Weight (kg)"])
+
+        temp['cost'] = price
+        lt.addLast(list, temp)
+    cont2 = 0 
+    for pos in range(1, lt.size(list)+1):
+        temp = lt.getElement(list, pos)
+        cont2 += float(temp['cost'])
+    ms.sort(list, sortCost)
+    tabla = agregarTabla(list,artists)
+    oldList = lt.newList('ARRAY_LIST')
+    for pos in range(1,lt.size(list)+1):
+        if lt.getElement(list,pos)['Date'] != '':
+            lt.addLast(oldList,lt.getElement(list,pos))
+    ms.sort(oldList, sortDate)
+    tablaOld = agregarTabla(oldList, artists)
+    str2 = 'El MoMa va a transportar %s artefactos de %s.\n RECUERDA!! No todos los datos del MoMa estan completos, esta es una aproximacion.\n Peso estimado: %s\n Costo total estimado: %s \n El top 5 de las obras mas caras.'%(str(lt.size(list)), department, str(round(peso,3)),str( round(total,3)))
+    
+    return str2, tabla,'Las cinco obras mas viejas', tablaOld
+  
+def sortDate(item1,item2):
+    if item1['Date'] < item2['Date']:
+        return True
+    else:
+        return False
+
+def agregarTabla(list, artists):
+    artStr = { }
+    
+    for pos in range(1, 6): 
+        temp = lt.getElement(list, pos)
+        artista =  getArtistsByCode(temp['ConstituentID'], artists)
+        artStr[pos] = temp['ObjectID'],temp['Title'],temp['Medium'], temp['Date'],artista,temp['cost'],temp['Classification'], temp['URL'] 
+    return  (pd.DataFrame.from_dict(artStr, orient='index', columns= ['ObjaectID', 'Title', 'Medium', 'Date', 'Artists', 'TranCost (USD)', 'Classification', 'URL']))
+    
+def getArtistsByCode(temp, artists):
+    str = ''
+    temp =  temp.split(',')
+    for item in temp:
+        name = onlyMapValue(artists, item.strip().strip('[').strip(']'))['DisplayName']
+        str += name + ', '
+
+    return str
+    
+
+def sortCost(item1, item2):
+    if item1['cost'] > item2['cost']:
+        return True
+    else:
+        return False
+
+
+def calCost(dimensions):
+
+    peso = 0
+    if dimensions[3] != '':
+        if dimensions[3] > 0:
+            peso = 72 * float(dimensions[3])
+
+    if dimensions[0] == '' or dimensions[1] == '':
+        pri1 = 0
+    else:
+        pri1 = ((float(dimensions[0]) * float(dimensions[1]))/10000)
+    if dimensions[2] != '' and pri1 != 0:
+        if float(dimensions[2]) > 0:
+            pri1 = (pri1 * float(dimensions[2]))/100
+
+    if pri1 > 0 :
+        pri1 =  72 * float(pri1)
+    if pri1 > peso:    
+        return pri1
+    elif peso > pri1:
+        return peso
+    elif peso > 0 and pri1 >0  and peso == pri1:
+        return pri1
+    elif pri1 <= 0 and peso <= 0:
+        return 48
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 def compareArtworks(artwork1, artwork2):

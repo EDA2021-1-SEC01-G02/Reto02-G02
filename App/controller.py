@@ -23,6 +23,7 @@
 import config as cf
 import model
 import csv
+import time
 
 #import time
 
@@ -44,19 +45,22 @@ def loadArtWorks(catalog):
     artworksfile = cf.data_dir + 'MoMA/Artworks-utf8-small.csv'
     input_file = csv.DictReader(open(artworksfile, encoding = 'utf-8'))
     #start_time = time.process_time()
+    cont = 0
     for artwork in input_file:
         model.addArtWork(catalog, artwork)
-        model.addMedium(catalog['medium'], artwork)
-        model.addNationality(catalog["nationality"], catalog["artists"], artwork)
+        model.addDepartment(catalog['department'], artwork)
+        
+        #model.addNationality(catalog["nationality"], catalog["artists"], artwork)
     #stop_time = time.process_time()
     #print((stop_time - start_time)*1000)
-
 
 def loadArtists(catalog):
     artistsfile = cf.data_dir + "MoMA/Artists-utf8-small.csv"
     input_file = csv.DictReader(open(artistsfile, encoding= "utf-8"))
     for artist in input_file:
         model.addArtist(catalog,artist)
+        model.addName(catalog, artist)
+
     
 
 # Funciones de ordenamiento
@@ -72,6 +76,18 @@ def sortNationalitiesByArtworksQuantity(map,key):
 """
 
 # Funciones de consulta sobre el catálogo
+def costoDepartamento(catalog, department):
+    artworks = model.getArtworkByDep(catalog, department)
+    to_print = model.getCost(artworks, catalog['artists'], department)
+    return to_print
+
+def obrasArtista(catalog, name):
+    start_time = time.process_time()
+    info = model.onlyMapValue(catalog['names'], name)
+    mapArtworks = model.artworksByArtist(catalog, info)
+    stop_time = time.process_time()
+    print((stop_time - start_time)*1000)
+    return mapArtworks
 
 def masAntic(map, len, medium):
     sortArtworksByDate(map, medium)

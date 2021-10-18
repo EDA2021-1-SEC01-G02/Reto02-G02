@@ -62,23 +62,38 @@ while True:
         print('Artworks cargados: ' + str(num_artworks))
         num_artists = lt.size(catalog["artists"])
         print("Artistas cargados: " + str(num_artists))
-
+        
     elif int(inputs[0]) == 2:
-        medium =  input('Ingrese el medio: \n')
-        len = int(input('Ingrese el numero de obras mas antiguas a cargar:\n'))
-        mapMedium = catalog['medium']
-        print('Las %s obras mas antiguas hechas en la modalidad %s son: \n' %(len, medium))
-        controller.masAntic(mapMedium, len, medium)
+        
+        pass
+
+    elif int(inputs[0]) == 3:
+        pass
+
+    elif int(inputs[0]) == 4:
+
+        name =  input('Digite el nombre del artista a buscar: ')
+        to_print = controller.obrasArtista(catalog, name)
+        for item in to_print:
+            print(item)
+        
+  
 
     #Requerimiento 4
-    elif int(inputs[0]) == 3:
+    elif int(inputs[0]) == 5:
         nacionalidad = input("Digite la nacionalidad a buscar: ").capitalize()
         resultado = controller.natRank(catalog["nationality"],nacionalidad)
         if resultado == None:
             print("No se encontro la nacionalidad especificada.")
         else:
             print("La nacionalidad "+nacionalidad+" tiene un total de obras de "+str(resultado))
-
+    
+    elif int(inputs[0]) == 6:
+        departamento = input('Digite el departamento a consultar: ')
+        to_print = controller.costoDepartamento(catalog, departamento)
+        for item in to_print:
+            print(item)
+        
 
     else:
         sys.exit(0)
