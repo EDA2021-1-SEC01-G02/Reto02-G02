@@ -286,7 +286,7 @@ def getCost(artworks, artists, department):
             lt.addLast(oldList,lt.getElement(list,pos))
     ms.sort(oldList, sortDate)
     tablaOld = agregarTabla(oldList, artists)
-    str2 = 'El MoMa va a transportar %s artefactos de %s.\n RECUERDA!! No todos los datos del MoMa estan completos, esta es una aproximacion.\n Peso estimado: %s\n Costo total estimado: %s \n El top 5 de las obras mas caras.'%(str(lt.size(list)), department, str(round(peso,3)),str( round(total,3)))
+    str2 = 'El MoMa va a transportar %s artefactos de %s.\n RECUERDA!! No todos los datos del MoMa estan completos, esta es una aproximacion.\n Peso estimado: %s\n Costo total estimado: %s \n El top 5 de las obras mas caras.'%(str(lt.size(list)), department, str((peso)),str( total))
     
     return str2, tabla,'Las cinco obras mas viejas', tablaOld
   
@@ -323,7 +323,7 @@ def sortCost(item1, item2):
 
 
 def calCost(dimensions):
-
+    pri2 = 0
     peso = 0
     if dimensions[3] != '':
         if dimensions[3] > 0:
@@ -332,20 +332,21 @@ def calCost(dimensions):
     if dimensions[0] == '' or dimensions[1] == '':
         pri1 = 0
     else:
-        pri1 = ((float(dimensions[0]) * float(dimensions[1]))/10000)
+        pri1 = (float(dimensions[0]) * float(dimensions[1]))/10000
     if dimensions[2] != '' and pri1 != 0:
         if float(dimensions[2]) > 0:
-            pri1 = (pri1 * float(dimensions[2]))/100
+            pri2 = ((pri1 * float(dimensions[2]))/100)
 
     if pri1 > 0 :
         pri1 =  72 * float(pri1)
-    if pri1 > peso:    
-        return pri1
-    elif peso > pri1:
-        return peso
-    elif peso > 0 and pri1 >0  and peso == pri1:
-        return pri1
-    elif pri1 <= 0 and peso <= 0:
+    if pri2 > 0:
+        pri2 = 72 * float(pri2)
+    
+    tup =  pri1,pri2, peso
+    fin = max(tup)
+    if fin > 0:
+        return fin
+    else:
         return 48
 
 # Funciones utilizadas para comparar elementos dentro de una lista
