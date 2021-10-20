@@ -75,13 +75,45 @@ def newCatalog():
                                 maptype='CHAINING',
                                 loadfactor=2,
                                 comparefunction=None)  
+    catalog['artdate'] =  mp.newMap(2000,
+                                maptype='PROBING',
+                                loadfactor=0.5,
+                                comparefunction=None)
 
  
     return catalog
 
 
 # Funciones para agregar informacion al catalogo
+def getRange(map, date1, date2):
+    list = lt.newList('ARRAY_LIST', None)
+    for date in range(int(date1), int(date2)+1):
+        date =  str(date)
+        if mp.contains(map,date):
+            temp = onlyMapValue(map, date)
+            for pos in range(1, lt.size(onlyMapValue(map, date))+1 ):
+                lt.addLast(list, lt.getElement(temp, pos))
+    ms.sort(list, sortDateAr)
+    str1 = 'Hay %s obras entre %s y %s' %(lt.size(list), date1, date2)
+    return list, str1
 
+def getSix(list):
+    size = lt.size(list)+1
+    dict = {}
+    for pos in range(1,4):
+        temp = lt.getElement(list, pos)
+        dict[pos] = temp['ConstituentID'], temp['DisplayName'],temp['BeginDate'], temp['Nationality'], temp['Gender'],temp['ArtistBio'], temp['Wiki QID'],temp['ULAN']
+    for pos in range(size-4, size):
+        temp = lt.getElement(list, pos)
+        dict[pos] = temp['ConstituentID'], temp['DisplayName'],temp['BeginDate'], temp['Nationality'], temp['Gender'],temp['ArtistBio'], temp['Wiki QID'],temp['ULAN']
+    to_print = pd.DataFrame.from_dict(dict, orient = 'index',columns=['ConstituentID', 'DisplayName', 'BeginDate', 'Nationality', 'Gender', 'ArtistBio','Wiki QID', 'ULAN'])
+    return to_print
+def sortDateAr(date1,date2):
+
+    if date1['BeginDate'] < date2['BeginDate']:
+        return True
+    else:
+        return False
 
 def addArtWork(catalog, artwork):
     """
@@ -115,6 +147,16 @@ def addDepartment(departments, artwork):
     art = onlyMapValue(departments,departmentName)
     lt.addLast(art, artwork)
 
+def addDate(dates, artist):
+    """
+    Añade mediums al mapa de Mediums y agrega artworks a una lista que tiene como valor
+    """
+    artistDate = artist['BeginDate']
+    if not mp.contains(dates, artistDate):
+        mp.put(dates, artistDate, lt.newList('ARRAY_LIST', None))
+    art = onlyMapValue(dates,artistDate)
+    lt.addLast(art, artist)
+
 def addNationality(nationalities, artists, artwork):
     """
     Añade nacionalidades al mapa de Nationality y agrega artworks a una lista que tiene como valor
@@ -135,6 +177,32 @@ def addNationality(nationalities, artists, artwork):
     
 
 # Funciones para creacion de datos
+def calCost(dimensions):
+    pri2 = 0
+    peso = 0
+    if dimensions[3] != '':
+        if dimensions[3] > 0:
+            peso = 72 * float(dimensions[3])
+
+    if dimensions[0] == '' or dimensions[1] == '':
+        pri1 = 0
+    else:
+        pri1 = (float(dimensions[0]) * float(dimensions[1]))/10000
+    if dimensions[2] != '' and pri1 != 0:
+        if float(dimensions[2]) > 0:
+            pri2 = ((pri1 * float(dimensions[2]))/100)
+
+    if pri1 > 0 :
+        pri1 =  72 * float(pri1)
+    if pri2 > 0:
+        pri2 = 72 * float(pri2)
+    
+    tup =  pri1,pri2, peso
+    fin = max(tup)
+    if fin > 0:
+        return fin
+    else:
+        return 48
 
 # Funciones de consulta
 
@@ -322,32 +390,6 @@ def sortCost(item1, item2):
         return False
 
 
-def calCost(dimensions):
-    pri2 = 0
-    peso = 0
-    if dimensions[3] != '':
-        if dimensions[3] > 0:
-            peso = 72 * float(dimensions[3])
-
-    if dimensions[0] == '' or dimensions[1] == '':
-        pri1 = 0
-    else:
-        pri1 = (float(dimensions[0]) * float(dimensions[1]))/10000
-    if dimensions[2] != '' and pri1 != 0:
-        if float(dimensions[2]) > 0:
-            pri2 = ((pri1 * float(dimensions[2]))/100)
-
-    if pri1 > 0 :
-        pri1 =  72 * float(pri1)
-    if pri2 > 0:
-        pri2 = 72 * float(pri2)
-    
-    tup =  pri1,pri2, peso
-    fin = max(tup)
-    if fin > 0:
-        return fin
-    else:
-        return 48
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 def compareArtworks(artwork1, artwork2):

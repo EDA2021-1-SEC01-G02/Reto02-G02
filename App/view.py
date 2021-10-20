@@ -64,8 +64,13 @@ while True:
         print("Artistas cargados: " + str(num_artists))
         
     elif int(inputs[0]) == 2:
+        print("\nBuscando en un rango de fechas: ")
+        initialDate = input("Fecha Inicial (YYYY-MM-DD): ")
+        finalDate = input("Fecha Final (YYYY-MM-DD): ")
+        to_print = controller.artistByDate(catalog, initialDate,finalDate)
+        for item in to_print:
+            print(item)
         
-        pass
 
     elif int(inputs[0]) == 3:
         pass

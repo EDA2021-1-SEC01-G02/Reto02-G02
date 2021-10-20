@@ -20,6 +20,7 @@
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
  """
 
+
 import config as cf
 import model
 import csv
@@ -42,7 +43,7 @@ def loadData(catalog):
     loadArtWorks(catalog)
 
 def loadArtWorks(catalog):
-    artworksfile = cf.data_dir + 'MoMA/Artworks-utf8-5pct.csv'
+    artworksfile = cf.data_dir + 'MoMA/Artworks-utf8-small.csv'
     input_file = csv.DictReader(open(artworksfile, encoding = 'utf-8'))
     #start_time = time.process_time()
     cont = 0
@@ -55,11 +56,12 @@ def loadArtWorks(catalog):
     #print((stop_time - start_time)*1000)
 
 def loadArtists(catalog):
-    artistsfile = cf.data_dir + "MoMA/Artists-utf8-5pct.csv"
+    artistsfile = cf.data_dir + "MoMA/Artists-utf8-small.csv"
     input_file = csv.DictReader(open(artistsfile, encoding= "utf-8"))
     for artist in input_file:
         model.addArtist(catalog,artist)
         model.addName(catalog, artist)
+        model.addDate(catalog['artdate'],artist )
 
     
 
@@ -76,6 +78,12 @@ def sortNationalitiesByArtworksQuantity(map,key):
 """
 
 # Funciones de consulta sobre el catálogo
+def artistByDate(catalog, date1, date2):
+    list =  model.getRange(catalog['artdate'], date1, date2)
+    getSix = model.getSix(list[0])
+    return list[1],getSix
+    
+
 def costoDepartamento(catalog, department):
     artworks = model.getArtworkByDep(catalog, department)
     to_print = model.getCost(artworks, catalog['artists'], department)
