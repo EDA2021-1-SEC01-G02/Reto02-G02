@@ -64,22 +64,22 @@ while True:
         print("Artistas cargados: " + str(num_artists))
         
     elif int(inputs[0]) == 2:
-        year1 = int(input("Digite el AÑO INICIAL: "))
-        year2 = int(input("Ahora digite el AÑO FINAL: "))
-        temp = controller.sortArtistsByDate(catalog["artists"],year1,year2)
-        print("\nHay %s artistas nacidos entre los años %s y %s" %(temp[1],year1,year2))
-        print("\nLos primeros y ultimos 3 artistas en este rango son:")
-        print(temp[0])
-        
-
-    elif int(inputs[0]) == 3:
         print("\nBuscando en un rango de fechas: ")
-        initialDate = input("Fecha Inicial (YYYY-MM-DD): ")
-        finalDate = input("Fecha Final (YYYY-MM-DD): ")
+        initialDate = input("Año inicial del rango: ")
+        finalDate = input("Año final del rango: ")
         to_print = controller.artistByDate(catalog, initialDate,finalDate)
         for item in to_print:
             print(item)
+        
+        
 
+    elif int(inputs[0]) == 3:
+        initialDate = input("Fecha Inicial (YYYY-MM-DD): ")
+        finalDate = input("Fecha Final (YYYY-MM-DD): ")
+        temp = controller.sortArtistsByDate(catalog["artists"],initialDate,finalDate)
+        print("\nHay %s artistas nacidos entre los años %s y %s" %(temp[1],initialDate,finalDate))
+        print("\nLos primeros y ultimos 3 artistas en este rango son:")
+        print(temp[0])
     elif int(inputs[0]) == 4:
 
         name =  input('Digite el nombre del artista a buscar: ')

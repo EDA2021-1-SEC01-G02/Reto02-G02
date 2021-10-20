@@ -232,7 +232,7 @@ def getRange(map, date1, date2):
             for pos in range(1, lt.size(onlyMapValue(map, date))+1 ):
                 lt.addLast(list, lt.getElement(temp, pos))
     ms.sort(list, sortDateAr)
-    str1 = 'Hay %s obras entre %s y %s' %(lt.size(list), date1, date2)
+    str1 = 'Hay %s artistas nacidos entre %s y %s' %(lt.size(list), date1, date2)
     return list, str1
 
 def getSix(list):
