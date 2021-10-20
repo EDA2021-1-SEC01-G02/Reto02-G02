@@ -73,18 +73,19 @@ while True:
         to_print = controller.artistByDate(catalog, initialDate,finalDate)
         for item in to_print:
             print(item)
-        
-        
 
-    elif int(inputs[0]) == 3:
+    #Requerimiento 2
+    elif int(inputs[0]) == 3: #TODO: Cambiar las fechas para que reciba lo del usuario
         initialDate = input("Fecha Inicial (YYYY-MM-DD): ")
+        initialDate = "1944-06-06"
         finalDate = input("Fecha Final (YYYY-MM-DD): ")
-        temp = controller.sortArtistsByDate(catalog["artists"],initialDate,finalDate)
-        print("\nHay %s artistas nacidos entre los años %s y %s" %(temp[1],initialDate,finalDate))
+        finalDate = "1989-11-09"
+        temp = controller.artworksByDate(catalog["artworksdate"],catalog["artists"],initialDate,finalDate)
+        print("\nEl MoMA adquirio %s piezas unicas entre los dias %s y %s,  con %s artistas distintos y compro %s de estas obras" %(temp[1],initialDate,finalDate,temp[2],"Numero-de-obras-compradas"))
         print("\nLos primeros y ultimos 3 artistas en este rango son:")
         print(temp[0])
-    elif int(inputs[0]) == 4:
 
+    elif int(inputs[0]) == 4:
         name =  input('Digite el nombre del artista a buscar: ')
         to_print = controller.obrasArtista(catalog, name)
         for item in to_print:

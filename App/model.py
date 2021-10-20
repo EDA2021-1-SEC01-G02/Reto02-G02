@@ -81,6 +81,11 @@ def newCatalog():
                                 maptype='PROBING',
                                 loadfactor=0.5,
                                 comparefunction=None)
+    
+    catalog['artworksdate'] =  mp.newMap(2000,
+                                maptype='PROBING',
+                                loadfactor=0.5,
+                                comparefunction=None)
 
     return catalog
 
@@ -126,6 +131,16 @@ def addDate(dates, artist):
         mp.put(dates, artistDate, lt.newList('ARRAY_LIST', None))
     art = onlyMapValue(dates,artistDate)
     lt.addLast(art, artist)
+
+def addArtworkDate(artworksDates, artwork):
+    """
+    Añade artworks al mapa de fechas para artworks y agrega artworks a una lista que tiene como valor
+    """
+    artworkDate = artwork['DateAcquired']
+    if not mp.contains(artworksDates, artworkDate):
+        mp.put(artworksDates, artworkDate, lt.newList('ARRAY_LIST', None))
+    date = onlyMapValue(artworksDates,artworkDate)
+    lt.addLast(date, artwork)
 
 def addNationality(nationalities, artists, artwork):
     """
@@ -235,6 +250,44 @@ def getRange(map, date1, date2):
     str1 = 'Hay %s artistas nacidos entre %s y %s' %(lt.size(list), date1, date2)
     return list, str1
 
+def getArtworksRange(map, date1, date2):
+    """
+    Obtiene los artworks segun un rango de fechas #TODO: Arreglar para que funcione con fechas y no como numeros
+    """
+    date1 = date1.replace("-","")
+    date2 = date2.replace("-","")
+
+    list = lt.newList('ARRAY_LIST', None)
+    for date in range(int(date1), int(date2)+1):
+        date = str(date)
+        date = date[:4]+"-"+date[4:6]+"-"+date[6:8]
+        if mp.contains(map,date):
+            temp = onlyMapValue(map, date)
+            for pos in range(1, lt.size(onlyMapValue(map, date))+1 ):
+                lt.addLast(list, lt.getElement(temp, pos))
+    ms.sort(list, cmpArtworkByDateAdquired)
+    return (list,lt.size(list))
+
+def countUniqueArtists(artworks,artworksSize):
+    """
+    Recorrera las obras en el rango y contara el numero de artistas. Solo una vez por artista
+    """
+
+    temp = mp.newMap(2000,
+                    maptype='PROBING',
+                    loadfactor=0.5,
+                    comparefunction=None)
+    
+    for i in range(0,artworksSize+1):
+        artwork = lt.getElement(artworks,i)
+        artistsTemp = artwork['ConstituentID'].split(',')
+        for artist in artistsTemp:
+            artist = artist.strip().strip('[').strip(']')
+            if not mp.contains(temp,artist):
+                mp.put(temp,artist,0)
+                
+    return mp.size(temp)
+
 def getSix(list):
     #Saca los primeros 3 y los ultimos 3 elementos de la lista
     size = lt.size(list)+1
@@ -249,14 +302,17 @@ def getSix(list):
     return to_print
 
 def getSixArtWorks(list,artists):
-    #Saca los primeros 3 y los ultimos 3 elementos de la lista, usado en el requerimiento de nacionalidades
+    """
+    Saca los primeros 3 y los ultimos 3 elementos de la lista, usado en el requerimiento de obras por fecha y de nacionalidades 
+    """
     size = lt.size(list)+1
     dict = {}
     for pos in range(1,4):
         temp = lt.getElement(list, pos)
         artistsTemp = getArtistsByCode(temp["ConstituentID"],artists)
         dict[pos] = temp['ObjectID'], temp['Title'], artistsTemp, temp['Medium'], temp['Date'], temp['Dimensions'], temp['Department'], temp['Classification'], temp['URL']
-    for pos in range(size-4, size):
+    for pos in range(size-3, size):
+        temp = lt.getElement(list, pos)
         artistsTemp = getArtistsByCode(temp["ConstituentID"],artists)
         dict[pos] = temp['ObjectID'], temp['Title'], artistsTemp, temp['Medium'], temp['Date'], temp['Dimensions'], temp['Department'], temp['Classification'], temp['URL']
     to_print = pd.DataFrame.from_dict(dict, orient = 'index',columns=['ObjectID',"Title","ArtistsNames","Medium","Date","Dimensions","Department","Classification","URL"])
@@ -474,6 +530,27 @@ def sortDateAr(date1,date2):
     
     if date1['BeginDate'] < date2['BeginDate']:
         return True
+    else:
+        return False
+
+def cmpArtworkByDateAdquired(artwork1,artwork2):
+    # Compara el dia de adquisicion de una obra, devolviendo True si el primero es menor
+
+    date1 = artwork1["DateAcquired"].split("-")
+    date2 = artwork2["DateAcquired"].split("-")
+    if len(date1)!= 3:
+        return True
+    if len(date2) != 3:
+        return False
+
+    if int(date1[0]) < int(date2[0]):
+        return True
+    elif int( date1[0]) == int(date2[0]):
+        if date1[1] < date2[1]:
+            return True
+        elif int(date1[1]) == int(date2[1]):
+            if int(date1[2]) < int(date2[2]):
+                return True  
     else:
         return False
 

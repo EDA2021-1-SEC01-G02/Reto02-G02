@@ -51,6 +51,7 @@ def loadArtWorks(catalog):
         model.addArtWork(catalog, artwork)
         model.addDepartment(catalog['department'], artwork)
         model.addNationality(catalog["nationality"], catalog["artists"], artwork)
+        model.addArtworkDate(catalog["artworksdate"],artwork)
     #stop_time = time.process_time()
     #print((stop_time - start_time)*1000)
 
@@ -78,6 +79,12 @@ def artistByDate(catalog, date1, date2):
     list =  model.getRange(catalog['artdate'], date1, date2)
     getSix = model.getSix(list[0])
     return list[1],getSix
+
+def artworksByDate(artworksdate,artists,inicial,final):
+    data = model.getArtworksRange(artworksdate,inicial,final)
+    uniqueArtists = model.countUniqueArtists(data[0],data[1])
+    getSix = model.getSixArtWorks(data[0],artists)
+    return (getSix,data[1],uniqueArtists)
 
 def obrasArtista(catalog, name):
     start_time = time.process_time()
