@@ -338,14 +338,11 @@ def getArtistNationality(artistid,artists):
     Recibe por parametro el ID del artista junto con el info de los artistas y devuelve su nacionalidad
     """
     result = None #Nacionalidad del artista. Se mantendra vacio si no lo encuentra
-    num = lt.size(artists)
-    for i in range(0,num+1): #Recorre
-        if mp.contains(artists,str(i)): #Revisa que si exista el id
-            temp = onlyMapValue(artists,str(i)) #Accede a los registros
-            tempid = temp["ConstituentID"]
-            if int(tempid) == int(artistid): #Compara los ID
-                result = temp["Nationality"] #Toma la nacionalidad
-                break #Rompe el for
+    if mp.contains(artists,artistid): #Revisa que si exista el id
+        temp = onlyMapValue(artists,artistid) #Accede a los registros
+        tempid = temp["ConstituentID"]
+        if int(tempid) == int(artistid): #Compara los ID
+            result = temp["Nationality"] #Toma la nacionalidad
     return result
 
 def getTopNationality(nationalities,topNats):
@@ -505,7 +502,7 @@ def sortDate(item1,item2):
         return False
 
 def cmpNationalitiesByArtworks(item1,item2):
-    if item1["Numero"] > item2["Numero"]:
+    if int(item1["Numero"]) > int(item2["Numero"]):
         return True
     else:
         return False
