@@ -37,8 +37,11 @@ operación solicitada
 def printMenu():
     print("Bienvenido")
     print("1- Cargar información en el catálogo")
-    print("2- Las n obras más antiguas para un medio específico")
-    print("3- Consultar el numero de obras de una nacionalidad")
+    print("2- Consultar artistas nacidos en un rango de años.")
+    print("3- Consultar obras hechas en un rango de fechas.")
+    print("4- Organizar las obras de un artistas por medios/tecnicas.")
+    print("5- Consultar el ranking de obras por nacionalidades.")
+    print("6- Consultar el costo de transporte de un departamento especifico.")
 
 catalog = None
 
