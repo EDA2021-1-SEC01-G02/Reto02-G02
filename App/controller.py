@@ -82,12 +82,6 @@ def artistByDate(catalog, date1, date2):
     list =  model.getRange(catalog['artdate'], date1, date2)
     getSix = model.getSix(list[0])
     return list[1],getSix
-    
-
-def costoDepartamento(catalog, department):
-    artworks = model.getArtworkByDep(catalog, department)
-    to_print = model.getCost(artworks, catalog['artists'], department)
-    return to_print
 
 def obrasArtista(catalog, name):
     start_time = time.process_time()
@@ -107,3 +101,8 @@ def natRank(map,nationality):
     #sortNationalitiesByArtworksQuantity(map, medium)
     #lst = model.getMapSubList(map,medium, 10)
     return (model.getNationalityArtworksNumber(map,nationality))
+
+def costoDepartamento(catalog, department):
+    artworks = model.getArtworkByDep(catalog, department)
+    to_print = model.getCost(artworks, catalog['artists'], department)
+    return to_print

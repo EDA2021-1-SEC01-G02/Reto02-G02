@@ -85,35 +85,6 @@ def newCatalog():
 
 
 # Funciones para agregar informacion al catalogo
-def getRange(map, date1, date2):
-    list = lt.newList('ARRAY_LIST', None)
-    for date in range(int(date1), int(date2)+1):
-        date =  str(date)
-        if mp.contains(map,date):
-            temp = onlyMapValue(map, date)
-            for pos in range(1, lt.size(onlyMapValue(map, date))+1 ):
-                lt.addLast(list, lt.getElement(temp, pos))
-    ms.sort(list, sortDateAr)
-    str1 = 'Hay %s obras entre %s y %s' %(lt.size(list), date1, date2)
-    return list, str1
-
-def getSix(list):
-    size = lt.size(list)+1
-    dict = {}
-    for pos in range(1,4):
-        temp = lt.getElement(list, pos)
-        dict[pos] = temp['ConstituentID'], temp['DisplayName'],temp['BeginDate'], temp['Nationality'], temp['Gender'],temp['ArtistBio'], temp['Wiki QID'],temp['ULAN']
-    for pos in range(size-4, size):
-        temp = lt.getElement(list, pos)
-        dict[pos] = temp['ConstituentID'], temp['DisplayName'],temp['BeginDate'], temp['Nationality'], temp['Gender'],temp['ArtistBio'], temp['Wiki QID'],temp['ULAN']
-    to_print = pd.DataFrame.from_dict(dict, orient = 'index',columns=['ConstituentID', 'DisplayName', 'BeginDate', 'Nationality', 'Gender', 'ArtistBio','Wiki QID', 'ULAN'])
-    return to_print
-def sortDateAr(date1,date2):
-
-    if date1['BeginDate'] < date2['BeginDate']:
-        return True
-    else:
-        return False
 
 def addArtWork(catalog, artwork):
     """
@@ -204,10 +175,59 @@ def calCost(dimensions):
     else:
         return 48
 
+def agregarTabla(list, artists):
+    artStr = { }
+    
+    for pos in range(1, 6): 
+        temp = lt.getElement(list, pos)
+        artista =  getArtistsByCode(temp['ConstituentID'], artists)
+        artStr[pos] = temp['ObjectID'],temp['Title'],temp['Medium'], temp['Date'],artista,temp['cost'],temp['Classification'], temp['URL'] 
+    return  (pd.DataFrame.from_dict(artStr, orient='index', columns= ['ObjaectID', 'Title', 'Medium', 'Date', 'Artists', 'TranCost (USD)', 'Classification', 'URL']))
+
+def crearStr(map,consID, leng, medium ):
+    temp = medium
+    stri = 'Louise Bourgeois con id de MoMa %s tiene %s obras a su nombre en el museo\n' %(consID, leng)
+    stri += 'Hay %s diferentes medios/tecnicas en su trabajo\n' %(mp.size(map))
+    stri += 'Medio/Tecnica' + 31 * ' ' + 'Conteo\n'
+    for pos in range(1, 6):
+        temp = lt.getElement(medium ,pos)
+        stri +=  temp[0] +   ' '* (50 - (len(temp[0] + str(temp[1])))) + str(temp[1]) + '\n'
+        
+    stri += 'Tres ejemplos de %s en la coleccion son:' %(lt.firstElement(medium )[0])
+    return stri
+
+
 # Funciones de consulta
+
+def getRange(map, date1, date2):
+    #Obtiene los artistas segun un rango
+    list = lt.newList('ARRAY_LIST', None)
+    for date in range(int(date1), int(date2)+1):
+        date =  str(date)
+        if mp.contains(map,date):
+            temp = onlyMapValue(map, date)
+            for pos in range(1, lt.size(onlyMapValue(map, date))+1 ):
+                lt.addLast(list, lt.getElement(temp, pos))
+    ms.sort(list, sortDateAr)
+    str1 = 'Hay %s obras entre %s y %s' %(lt.size(list), date1, date2)
+    return list, str1
+
+def getSix(list):
+    #Saca los primeros 3 y los ultimos 3 elementos de la lista
+    size = lt.size(list)+1
+    dict = {}
+    for pos in range(1,4):
+        temp = lt.getElement(list, pos)
+        dict[pos] = temp['ConstituentID'], temp['DisplayName'],temp['BeginDate'], temp['Nationality'], temp['Gender'],temp['ArtistBio'], temp['Wiki QID'],temp['ULAN']
+    for pos in range(size-4, size):
+        temp = lt.getElement(list, pos)
+        dict[pos] = temp['ConstituentID'], temp['DisplayName'],temp['BeginDate'], temp['Nationality'], temp['Gender'],temp['ArtistBio'], temp['Wiki QID'],temp['ULAN']
+    to_print = pd.DataFrame.from_dict(dict, orient = 'index',columns=['ConstituentID', 'DisplayName', 'BeginDate', 'Nationality', 'Gender', 'ArtistBio','Wiki QID', 'ULAN'])
+    return to_print
 
 
 def artworksByArtist(catalog, info):
+    #Saca las obras por artistas
     consID =  info['ConstituentID']
     artworksList = getArtWorksList(catalog['artworks'], consID)
     tecs = (mp.keySet(artworksList))
@@ -233,32 +253,10 @@ def artworksByArtist(catalog, info):
     data = pd.DataFrame.from_dict(artStr, orient= 'index', columns=['ObjaectID', 'Title', 'Medium', 'Date', 'DateAcquired', 'Department', 'Classification', 'URL' ])
     return stri, data
 
-def crearStr(map,consID, leng, medium ):
-    temp = medium
-    stri = 'Louise Bourgeois con id de MoMa %s tiene %s obras a su nombre en el museo\n' %(consID, leng)
-    stri += 'Hay %s diferentes medios/tecnicas en su trabajo\n' %(mp.size(map))
-    stri += 'Medio/Tecnica' + 31 * ' ' + 'Conteo\n'
-    for pos in range(1, 6):
-        temp = lt.getElement(medium ,pos)
-        stri +=  temp[0] +   ' '* (50 - (len(temp[0] + str(temp[1])))) + str(temp[1]) + '\n'
-        
-    stri += 'Tres ejemplos de %s en la coleccion son:' %(lt.firstElement(medium )[0])
-    return stri
 
-def compareAlf(item1, item2):
-    if item1[0] > item2[0]:
-        return True
-    else:
-        return False
-
-def compareCont(item1, item2):
-    #Compara cual de los dos conteos es mayor (Se utiliza para ordenar las nacionalidades)
-    if item1[1] > item2[1]:
-        return True
-    else:
-        return False
 
 def getArtWorksList(artworks , consID):
+
     map = mp.newMap(15223,
                     maptype='PROBING',
                     loadfactor=0.5,
@@ -287,6 +285,7 @@ def addMedium(mediums, artwork):
 
 
 def onlyMapValue(map, key):
+    # Dado un mapa y una llave, retorna el valor de la pareja
     """
     Se encarga de buscar el valor de un par, dado el mapa y la llave
     """
@@ -358,22 +357,8 @@ def getCost(artworks, artists, department):
     
     return str2, tabla,'Las cinco obras mas viejas', tablaOld
   
-def sortDate(item1,item2):
-    if item1['Date'] < item2['Date']:
-        return True
-    else:
-        return False
-
-def agregarTabla(list, artists):
-    artStr = { }
-    
-    for pos in range(1, 6): 
-        temp = lt.getElement(list, pos)
-        artista =  getArtistsByCode(temp['ConstituentID'], artists)
-        artStr[pos] = temp['ObjectID'],temp['Title'],temp['Medium'], temp['Date'],artista,temp['cost'],temp['Classification'], temp['URL'] 
-    return  (pd.DataFrame.from_dict(artStr, orient='index', columns= ['ObjaectID', 'Title', 'Medium', 'Date', 'Artists', 'TranCost (USD)', 'Classification', 'URL']))
-    
 def getArtistsByCode(temp, artists):
+    #Saca los artistas segun su codigo
     str = ''
     temp =  temp.split(',')
     for item in temp:
@@ -381,14 +366,6 @@ def getArtistsByCode(temp, artists):
         str += name + ', '
 
     return str
-    
-
-def sortCost(item1, item2):
-    if item1['cost'] > item2['cost']:
-        return True
-    else:
-        return False
-
 
 
 # Funciones utilizadas para comparar elementos dentro de una lista
@@ -452,6 +429,37 @@ def cmpArtworkByDate(artwork1,artwork2):
     else:
         return False
 
+def sortDateAr(date1,date2):
+    
+    if date1['BeginDate'] < date2['BeginDate']:
+        return True
+    else:
+        return False
+
+def sortCost(item1, item2):
+    if item1['cost'] > item2['cost']:
+        return True
+    else:
+        return False
+def compareAlf(item1, item2):
+    if item1[0] > item2[0]:
+        return True
+    else:
+        return False
+
+def compareCont(item1, item2):
+    #Compara cual de los dos conteos es mayor (Se utiliza para ordenar las nacionalidades)
+    if item1[1] > item2[1]:
+        return True
+    else:
+        return False
+
+def sortDate(item1,item2):
+    if item1['Date'] < item2['Date']:
+        return True
+    else:
+        return False
+
 # Funciones de ordenamiento
 
 def sortArtworksByDate(lst, cmpfunction):
@@ -460,3 +468,4 @@ def sortArtworksByDate(lst, cmpfunction):
     """
     if 'cmpArtworksByDate' == cmpfunction:
         ms.sort(lst, cmpArtworkByDate)
+

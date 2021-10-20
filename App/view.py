@@ -81,8 +81,6 @@ while True:
         to_print = controller.obrasArtista(catalog, name)
         for item in to_print:
             print(item)
-        
-  
 
     #Requerimiento 4
     elif int(inputs[0]) == 5:
