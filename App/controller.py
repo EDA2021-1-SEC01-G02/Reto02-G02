@@ -21,6 +21,7 @@
  """
 
 
+#from App.model import top10DataFrame
 import config as cf
 import model
 import csv
@@ -46,12 +47,10 @@ def loadArtWorks(catalog):
     artworksfile = cf.data_dir + 'MoMA/Artworks-utf8-small.csv'
     input_file = csv.DictReader(open(artworksfile, encoding = 'utf-8'))
     #start_time = time.process_time()
-    cont = 0
     for artwork in input_file:
         model.addArtWork(catalog, artwork)
         model.addDepartment(catalog['department'], artwork)
-        
-        #model.addNationality(catalog["nationality"], catalog["artists"], artwork)
+        model.addNationality(catalog["nationality"], catalog["artists"], artwork)
     #stop_time = time.process_time()
     #print((stop_time - start_time)*1000)
 
@@ -71,11 +70,8 @@ def sortArtworksByDate(map, key):
     lst = model.onlyMapValue(map, key)
     model.sortArtworksByDate(lst, 'cmpArtworksByDate')
 
-""" Trabajar para la version completa en el reto
-def sortNationalitiesByArtworksQuantity(map,key):
-    lst = model.onlyMapValue
-    model.sortNationalitiesByArtworksQuantity()
-"""
+def sortArtistsByDate(nats):
+    pass
 
 # Funciones de consulta sobre el catálogo
 def artistByDate(catalog, date1, date2):
@@ -97,10 +93,12 @@ def masAntic(map, len, medium):
     for a in lst['elements']:
         print(a)
 
-def natRank(map,nationality):
-    #sortNationalitiesByArtworksQuantity(map, medium)
-    #lst = model.getMapSubList(map,medium, 10)
-    return (model.getNationalityArtworksNumber(map,nationality))
+def natRank(nats,artists):
+    top10lst = model.top10lst(nats) 
+    top10DataFrame = model.top10DataFrame(top10lst)
+    topNat = model.getTopNationality(nats,top10lst)
+    topDataFrame = model.getSixArtWorks(topNat[2],artists)
+    return (top10DataFrame,topDataFrame,topNat[0],topNat[1])
 
 def costoDepartamento(catalog, department):
     artworks = model.getArtworkByDep(catalog, department)

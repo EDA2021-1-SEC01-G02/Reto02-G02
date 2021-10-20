@@ -64,16 +64,21 @@ while True:
         print("Artistas cargados: " + str(num_artists))
         
     elif int(inputs[0]) == 2:
+        year1 = int(input("Digite el AÑO INICIAL: "))
+        year2 = int(input("Ahora digite el AÑO FINAL: "))
+        temp = controller.sortArtistsByDate(catalog["artists"],year1,year2)
+        print("\nHay %s artistas nacidos entre los años %s y %s" %(temp[1],year1,year2))
+        print("\nLos primeros y ultimos 3 artistas en este rango son:")
+        print(temp[0])
+        
+
+    elif int(inputs[0]) == 3:
         print("\nBuscando en un rango de fechas: ")
         initialDate = input("Fecha Inicial (YYYY-MM-DD): ")
         finalDate = input("Fecha Final (YYYY-MM-DD): ")
         to_print = controller.artistByDate(catalog, initialDate,finalDate)
         for item in to_print:
             print(item)
-        
-
-    elif int(inputs[0]) == 3:
-        pass
 
     elif int(inputs[0]) == 4:
 
@@ -84,12 +89,12 @@ while True:
 
     #Requerimiento 4
     elif int(inputs[0]) == 5:
-        nacionalidad = input("Digite la nacionalidad a buscar: ").capitalize()
-        resultado = controller.natRank(catalog["nationality"],nacionalidad)
-        if resultado == None:
-            print("No se encontro la nacionalidad especificada.")
-        else:
-            print("La nacionalidad "+nacionalidad+" tiene un total de obras de "+str(resultado))
+        temp = controller.natRank(catalog["nationality"],catalog["artists"])
+        print("TOP 10 Nacionalidades:")
+        print(temp[0])
+        print("La nacionalidad TOP en el museo es %s con %s piezas unicas." %(temp[2],temp[3])) 
+        print("Los primeros y ultimos 3 objetos en la lista de trabajos %s son: " %(temp[2]))
+        print(temp[1])
     
     elif int(inputs[0]) == 6:
         departamento = input('Digite el departamento a consultar: ')

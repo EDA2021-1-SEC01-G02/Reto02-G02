@@ -24,6 +24,7 @@
  * Dario Correal - Version inicial
  """
 
+from DISClib.DataStructures.chaininghashtable import keySet
 import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
@@ -37,7 +38,7 @@ assert cf
 Se define la estructura de un catálogo de videos. El catálogo tendrá dos listas, una para los videos, otra para las categorias de
 los mismos.
 """
-#XDDDDD
+
 # Construccion de modelos
 def newCatalog():
     """ Inicializa el catálogo de obras
@@ -75,14 +76,13 @@ def newCatalog():
                                 maptype='CHAINING',
                                 loadfactor=2,
                                 comparefunction=None)  
+
     catalog['artdate'] =  mp.newMap(2000,
                                 maptype='PROBING',
                                 loadfactor=0.5,
                                 comparefunction=None)
 
- 
     return catalog
-
 
 # Funciones para agregar informacion al catalogo
 
@@ -106,7 +106,6 @@ def addArtist(catalog, artist):
     artistCode =  artist['ConstituentID']
     if not mp.contains(artists,artistCode):
         mp.put(artists, artistCode,artist)
-
 
 def addDepartment(departments, artwork):
     """
@@ -137,7 +136,7 @@ def addNationality(nationalities, artists, artwork):
     for i in artistid:
         i = i.strip("[").strip("]").strip()
         if i != "":
-            artistnat = getArtistNationality(i,artists) #Posiblemente haya que crear una funcion que recorra la lista y adquiera la nacionalidad
+            artistnat = getArtistNationality(str(i),artists) #Posiblemente haya que crear una funcion que recorra la lista y adquiera la nacionalidad
             if artistnat != None: #Si encontro el artista
                 if (artistnat == ""): 
                     artistnat = "Nationality unknown"
@@ -146,7 +145,6 @@ def addNationality(nationalities, artists, artwork):
                 art = onlyMapValue(nationalities, artistnat)
                 lt.addLast(art, artwork)
     
-
 # Funciones para creacion de datos
 def calCost(dimensions):
     pri2 = 0
@@ -196,6 +194,31 @@ def crearStr(map,consID, leng, medium ):
     stri += 'Tres ejemplos de %s en la coleccion son:' %(lt.firstElement(medium )[0])
     return stri
 
+def top10lst (nationalities):
+    """
+    Extrae las nacionalidades y el numero de obras para organizarlas y sacar el top 10 en forma de lista
+    """
+    data = lt.newList("ARRAY_LIST",cmpfunction=cmpNationalitiesByArtworks)
+    nats = mp.keySet(nationalities)
+    
+    for pos in range(lt.size(nats)+1):
+        nat = lt.getElement(nats,pos)
+        temp = onlyMapValue(nationalities,nat)
+        lt.addLast(data,{"Nacionalidad":nat,"Numero":lt.size(temp)})
+    ms.sort(data,cmpNationalitiesByArtworks)
+    result = lt.subList(data,1,10)
+    print(result)
+    return result
+
+def top10DataFrame (lst):
+    """
+    Convierte la lista de top 10 en un DataFrame para mostrar
+    """
+    data = {}
+    for pos in range(0, 10):
+        temp = lt.getElement(lst, pos)
+        data[pos] = temp['Nacionalidad'], temp["Numero"]
+    return pd.DataFrame.from_dict(data,orient = "index",columns=["Nationality","ArtWorks"])
 
 # Funciones de consulta
 
@@ -225,6 +248,19 @@ def getSix(list):
     to_print = pd.DataFrame.from_dict(dict, orient = 'index',columns=['ConstituentID', 'DisplayName', 'BeginDate', 'Nationality', 'Gender', 'ArtistBio','Wiki QID', 'ULAN'])
     return to_print
 
+def getSixArtWorks(list,artists):
+    #Saca los primeros 3 y los ultimos 3 elementos de la lista, usado en el requerimiento de nacionalidades
+    size = lt.size(list)+1
+    dict = {}
+    for pos in range(1,4):
+        temp = lt.getElement(list, pos)
+        artistsTemp = getArtistsByCode(temp["ConstituentID"],artists)
+        dict[pos] = temp['ObjectID'], temp['Title'], artistsTemp, temp['Medium'], temp['Date'], temp['Dimensions'], temp['Department'], temp['Classification'], temp['URL']
+    for pos in range(size-4, size):
+        artistsTemp = getArtistsByCode(temp["ConstituentID"],artists)
+        dict[pos] = temp['ObjectID'], temp['Title'], artistsTemp, temp['Medium'], temp['Date'], temp['Dimensions'], temp['Department'], temp['Classification'], temp['URL']
+    to_print = pd.DataFrame.from_dict(dict, orient = 'index',columns=['ObjectID',"Title","ArtistsNames","Medium","Date","Dimensions","Department","Classification","URL"])
+    return to_print
 
 def artworksByArtist(catalog, info):
     #Saca las obras por artistas
@@ -252,8 +288,6 @@ def artworksByArtist(catalog, info):
         artStr[pos] = temp['ObjectID'],temp['Title'],temp['Medium'], temp['Date'],temp['DateAcquired'],temp['Department'],temp['Classification'], temp['URL'] 
     data = pd.DataFrame.from_dict(artStr, orient= 'index', columns=['ObjaectID', 'Title', 'Medium', 'Date', 'DateAcquired', 'Department', 'Classification', 'URL' ])
     return stri, data
-
-
 
 def getArtWorksList(artworks , consID):
 
@@ -283,7 +317,6 @@ def addMedium(mediums, artwork):
     art = onlyMapValue(mediums,mediumName)
     lt.addLast(art, artwork)
 
-
 def onlyMapValue(map, key):
     # Dado un mapa y una llave, retorna el valor de la pareja
     """
@@ -301,18 +334,29 @@ def getMapSubList(map,medium, len):
     return new
 
 def getArtistNationality(artistid,artists):
-    """Recibe por parametro el ID del artista junto con el info de los artistas y devuelve su nacionalidad"""
+    """
+    Recibe por parametro el ID del artista junto con el info de los artistas y devuelve su nacionalidad
+    """
     result = None #Nacionalidad del artista. Se mantendra vacio si no lo encuentra
     num = lt.size(artists)
     for i in range(0,num+1): #Recorre
-        temp = lt.getElement(artists,i) #Accede a los registros
-        tempid = temp["ConstituentID"]
-        if tempid == artistid: #Compara los ID
-            result = temp["Nationality"] #Toma la nacionalidad
-            break #Rompe el for
+        if mp.contains(artists,str(i)): #Revisa que si exista el id
+            temp = onlyMapValue(artists,str(i)) #Accede a los registros
+            tempid = temp["ConstituentID"]
+            if int(tempid) == int(artistid): #Compara los ID
+                result = temp["Nationality"] #Toma la nacionalidad
+                break #Rompe el for
     return result
 
-def getNationalityArtworksNumber(nationalities,nationality): #TODO: Funcion temporal del lab 6, puede borrarse para la entrega final del reto o ser modificado para que muestre en tablas.
+def getTopNationality(nationalities,topNats):
+    topNat = lt.getElement(topNats,1)
+    topNum = topNat["Numero"]
+    topNat = topNat["Nacionalidad"]
+    topLst = onlyMapValue(nationalities,topNat)
+    return (topNat,topNum,topLst)
+        
+
+def getNationalityArtworksNumber(nationalities,nationality):
     """
     Obtiene la nacionalidad en str y el map de nacionalidades. Retorna el numero de obras en esa nacionalidad.
     """
@@ -460,6 +504,12 @@ def sortDate(item1,item2):
     else:
         return False
 
+def cmpNationalitiesByArtworks(item1,item2):
+    if item1["Numero"] > item2["Numero"]:
+        return True
+    else:
+        return False
+
 # Funciones de ordenamiento
 
 def sortArtworksByDate(lst, cmpfunction):
@@ -469,3 +519,4 @@ def sortArtworksByDate(lst, cmpfunction):
     if 'cmpArtworksByDate' == cmpfunction:
         ms.sort(lst, cmpArtworkByDate)
 
+ 
