@@ -81,7 +81,7 @@ while True:
         finalDate = input("Fecha Final (YYYY-MM-DD): ")
         finalDate = "1989-11-09"
         temp = controller.artworksByDate(catalog["artworksdate"],catalog["artists"],initialDate,finalDate)
-        print("\nEl MoMA adquirio %s piezas unicas entre los dias %s y %s,  con %s artistas distintos y compro %s de estas obras" %(temp[1],initialDate,finalDate,temp[2],"Numero-de-obras-compradas"))
+        print("\nEl MoMA adquirio %s piezas unicas entre los dias %s y %s,  con %s artistas distintos y compro %s de estas obras" %(temp[1],initialDate,finalDate,temp[2],temp[3]))
         print("\nLos primeros y ultimos 3 artistas en este rango son:")
         print(temp[0])
 

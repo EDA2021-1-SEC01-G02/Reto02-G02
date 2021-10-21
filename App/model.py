@@ -252,7 +252,7 @@ def getRange(map, date1, date2):
 
 def getArtworksRange(map, date1, date2):
     """
-    Obtiene los artworks segun un rango de fechas #TODO: Arreglar para que funcione con fechas y no como numeros
+    Obtiene los artworks segun un rango de fechas #TODO: Arreglar para que funcione con fechas y no como numeros de ser posible
     """
     date1 = date1.replace("-","")
     date2 = date2.replace("-","")
@@ -287,6 +287,21 @@ def countUniqueArtists(artworks,artworksSize):
                 mp.put(temp,artist,0)
                 
     return mp.size(temp)
+
+def getPurchasedArtworks(artworks,artworksSize):
+    """
+    Retorna la cantidad de obras que hayan sido compradas
+    """
+    resultado = 0
+
+    for i in range(0,artworksSize+1):
+        artwork = lt.getElement(artworks,i)
+        artworkTemp = artwork['CreditLine'].lower()
+        artworkTemp = artworkTemp.split(' ')
+        if "purchase" in artworkTemp:
+            resultado += 1
+    return resultado
+
 
 def getSix(list):
     #Saca los primeros 3 y los ultimos 3 elementos de la lista

@@ -20,14 +20,10 @@
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
  """
 
-
-#from App.model import top10DataFrame
 import config as cf
 import model
 import csv
 import time
-
-#import time
 
 """
 El controlador se encarga de mediar entre la vista y el modelo.
@@ -63,16 +59,11 @@ def loadArtists(catalog):
         model.addName(catalog, artist)
         model.addDate(catalog['artdate'],artist )
 
-    
-
 # Funciones de ordenamiento
 
 def sortArtworksByDate(map, key):
     lst = model.onlyMapValue(map, key)
     model.sortArtworksByDate(lst, 'cmpArtworksByDate')
-
-def sortArtistsByDate(nats):
-    pass
 
 # Funciones de consulta sobre el catálogo
 def artistByDate(catalog, date1, date2):
@@ -83,8 +74,9 @@ def artistByDate(catalog, date1, date2):
 def artworksByDate(artworksdate,artists,inicial,final):
     data = model.getArtworksRange(artworksdate,inicial,final)
     uniqueArtists = model.countUniqueArtists(data[0],data[1])
+    purchasedArtworks = model.getPurchasedArtworks(data[0],data[1])
     getSix = model.getSixArtWorks(data[0],artists)
-    return (getSix,data[1],uniqueArtists)
+    return (getSix,data[1],uniqueArtists,purchasedArtworks)
 
 def obrasArtista(catalog, name):
     start_time = time.process_time()
