@@ -222,7 +222,6 @@ def top10lst (nationalities):
         lt.addLast(data,{"Nacionalidad":nat,"Numero":lt.size(temp)})
     ms.sort(data,cmpNationalitiesByArtworks)
     result = lt.subList(data,1,10)
-    print(result)
     return result
 
 def top10DataFrame (lst):
@@ -273,20 +272,17 @@ def countUniqueArtists(artworks,artworksSize):
     Recorrera las obras en el rango y contara el numero de artistas. Solo una vez por artista
     """
 
-    temp = mp.newMap(2000,
-                    maptype='PROBING',
-                    loadfactor=0.5,
-                    comparefunction=None)
+    temp = lt.newList('ARRAY_LIST', None)
     
-    for i in range(0,artworksSize+1):
+    for i in range(1,artworksSize+1):
         artwork = lt.getElement(artworks,i)
         artistsTemp = artwork['ConstituentID'].split(',')
+        print(artistsTemp)
         for artist in artistsTemp:
             artist = artist.strip().strip('[').strip(']')
-            if not mp.contains(temp,artist):
-                mp.put(temp,artist,0)
+            lt.addLast(temp,artist)
                 
-    return mp.size(temp)
+    return lt.size(temp)
 
 def getPurchasedArtworks(artworks,artworksSize):
     """
