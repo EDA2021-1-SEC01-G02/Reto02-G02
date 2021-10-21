@@ -69,9 +69,7 @@ while True:
     elif int(inputs[0]) == 2:
         print("\nBuscando en un rango de fechas: ")
         initialDate = input("Año inicial del rango: ")
-        initialDate = "1920"
         finalDate = input("Año final del rango: ")
-        finalDate = "1985"
         to_print = controller.artistByDate(catalog, initialDate,finalDate)
         for item in to_print:
             print(item)
@@ -79,9 +77,9 @@ while True:
     #Requerimiento 2
     elif int(inputs[0]) == 3:
         initialDate = input("Fecha Inicial (YYYY-MM-DD): ")
-        initialDate = "1944-06-06"
+
         finalDate = input("Fecha Final (YYYY-MM-DD): ")
-        finalDate = "1989-11-09"
+
         temp = controller.artworksByDate(catalog["artworksdate"],catalog["artists"],initialDate,finalDate)
         print("\nEl MoMA adquirio %s piezas unicas entre los dias %s y %s, con %s artistas distintos y compro %s de estas obras" %(temp[1],initialDate,finalDate,temp[2],temp[3]))
         print("Los primeros y ultimos 3 artistas en este rango son:")
@@ -89,7 +87,6 @@ while True:
 
     elif int(inputs[0]) == 4:
         name =  input('Digite el nombre del artista a buscar: ')
-        name = "Louise Bourgeois"
         to_print = controller.obrasArtista(catalog, name)
         for item in to_print:
             print(item)
@@ -105,7 +102,6 @@ while True:
     
     elif int(inputs[0]) == 6:
         departamento = input('Digite el departamento a consultar: ')
-        departamento = "Drawings & Prints"
         to_print = controller.costoDepartamento(catalog, departamento)
         for item in to_print:
             print(item)
