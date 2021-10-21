@@ -213,12 +213,12 @@ def top10lst (nationalities):
     """
     Extrae las nacionalidades y el numero de obras para organizarlas y sacar el top 10 en forma de lista
     """
-    data = lt.newList("ARRAY_LIST",cmpfunction=cmpNationalitiesByArtworks)
-    nats = mp.keySet(nationalities)
+    data = lt.newList("ARRAY_LIST",None) #Lista en donde se almacenaran la nacionalidad y el numero de obras
+    nats = mp.keySet(nationalities) #Para recorrer el map de nacionalidades, viene en forma de lista
     
-    for pos in range(lt.size(nats)+1):
-        nat = lt.getElement(nats,pos)
-        temp = onlyMapValue(nationalities,nat)
+    for pos in range(lt.size(nats)+1): #Recorre nacionalidades
+        nat = lt.getElement(nats,pos) #Obtiene una nacionalidad de la lista de nacionalidades
+        temp = onlyMapValue(nationalities,nat) #Obtiene los valores de la nacionalidad
         lt.addLast(data,{"Nacionalidad":nat,"Numero":lt.size(temp)})
     ms.sort(data,cmpNationalitiesByArtworks)
     result = lt.subList(data,1,10)
@@ -277,7 +277,6 @@ def countUniqueArtists(artworks,artworksSize):
     for i in range(1,artworksSize+1):
         artwork = lt.getElement(artworks,i)
         artistsTemp = artwork['ConstituentID'].split(',')
-        print(artistsTemp)
         for artist in artistsTemp:
             artist = artist.strip().strip('[').strip(']')
             lt.addLast(temp,artist)
@@ -412,10 +411,24 @@ def getArtistNationality(artistid,artists):
             result = temp["Nationality"] #Toma la nacionalidad
     return result
 
-def getTopNationality(nationalities,topNats):
+def getTopNationality(nationalities,topNats,artists):
     topNat = lt.getElement(topNats,1)
-    topNum = topNat["Numero"]
     topNat = topNat["Nacionalidad"]
+    topNum = 0
+    lst = onlyMapValue(nationalities,topNat)
+    for artwork in range(0,lt.size(lst)):
+        artwork = lt.getElement(lst,artwork)
+        unique = True
+        artistsID = artwork["ConstituentID"]
+        artistsID = artistsID.strip().strip('[').strip(']').replace(" ","")
+        artistsID = artistsID.split(",")
+        for artistID in artistsID:
+            artistInfo = onlyMapValue(artists,artistID)
+            if artistInfo["Nationality"] != topNat:
+                unique = False
+                break
+        if unique:
+            topNum += 1
     topLst = onlyMapValue(nationalities,topNat)
     return (topNat,topNum,topLst)
         

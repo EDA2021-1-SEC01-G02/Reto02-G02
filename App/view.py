@@ -75,11 +75,9 @@ while True:
             print(item)
 
     #Requerimiento 2
-    elif int(inputs[0]) == 3: #TODO: Cambiar las fechas para que reciba lo del usuario
+    elif int(inputs[0]) == 3:
         initialDate = input("Fecha Inicial (YYYY-MM-DD): ")
-        initialDate = "1944-06-06"
         finalDate = input("Fecha Final (YYYY-MM-DD): ")
-        finalDate = "1989-11-09"
         temp = controller.artworksByDate(catalog["artworksdate"],catalog["artists"],initialDate,finalDate)
         print("\nEl MoMA adquirio %s piezas unicas entre los dias %s y %s, con %s artistas distintos y compro %s de estas obras" %(temp[1],initialDate,finalDate,temp[2],temp[3]))
         print("Los primeros y ultimos 3 artistas en este rango son:")

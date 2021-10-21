@@ -95,7 +95,7 @@ def masAntic(map, len, medium):
 def natRank(nats,artists):
     top10lst = model.top10lst(nats) 
     top10DataFrame = model.top10DataFrame(top10lst)
-    topNat = model.getTopNationality(nats,top10lst)
+    topNat = model.getTopNationality(nats,top10lst,artists)
     topDataFrame = model.getSixArtWorks(topNat[2],artists)
     return (top10DataFrame,topDataFrame,topNat[0],topNat[1])
 
