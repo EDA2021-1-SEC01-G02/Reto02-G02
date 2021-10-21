@@ -202,7 +202,11 @@ def crearStr(map,consID, leng, medium ):
     stri = 'Louise Bourgeois con id de MoMa %s tiene %s obras a su nombre en el museo\n' %(consID, leng)
     stri += 'Hay %s diferentes medios/tecnicas en su trabajo\n' %(mp.size(map))
     stri += 'Medio/Tecnica' + 31 * ' ' + 'Conteo\n'
-    for pos in range(1, 6):
+    if lt.size(medium) < 6 :
+        fin = lt.size(medium)
+    else:
+        fin = 6
+    for pos in range(1, fin):
         temp = lt.getElement(medium ,pos)
         stri +=  temp[0] +   ' '* (50 - (len(temp[0] + str(temp[1])))) + str(temp[1]) + '\n'
         
