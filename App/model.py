@@ -165,7 +165,7 @@ def calCost(dimensions):
     pri2 = 0
     peso = 0
     if dimensions[3] != '':
-        if dimensions[3] > 0:
+        if float(dimensions[3]) > 0:
             peso = 72 * float(dimensions[3])
 
     if dimensions[0] == '' or dimensions[1] == '':

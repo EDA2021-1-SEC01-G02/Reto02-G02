@@ -40,19 +40,16 @@ def loadData(catalog):
     loadArtWorks(catalog)
 
 def loadArtWorks(catalog):
-    artworksfile = cf.data_dir + 'MoMA/Artworks-utf8-small.csv'
+    artworksfile = cf.data_dir + 'MoMA/Artworks-utf8-large.csv'
     input_file = csv.DictReader(open(artworksfile, encoding = 'utf-8'))
-    #start_time = time.process_time()
     for artwork in input_file:
         model.addArtWork(catalog, artwork)
         model.addDepartment(catalog['department'], artwork)
         model.addNationality(catalog["nationality"], catalog["artists"], artwork)
         model.addArtworkDate(catalog["artworksdate"],artwork)
-    #stop_time = time.process_time()
-    #print((stop_time - start_time)*1000)
 
 def loadArtists(catalog):
-    artistsfile = cf.data_dir + "MoMA/Artists-utf8-small.csv"
+    artistsfile = cf.data_dir + "MoMA/Artists-utf8-large.csv"
     input_file = csv.DictReader(open(artistsfile, encoding= "utf-8"))
     for artist in input_file:
         model.addArtist(catalog,artist)
@@ -67,39 +64,54 @@ def sortArtworksByDate(map, key):
 
 # Funciones de consulta sobre el catálogo
 def artistByDate(catalog, date1, date2):
+    #start_time = time.process_time()
     list =  model.getRange(catalog['artdate'], date1, date2)
     getSix = model.getSix(list[0])
+    #stop_time = time.process_time()
+    #print((stop_time - start_time)*1000)
     return list[1],getSix
 
 def artworksByDate(artworksdate,artists,inicial,final):
+    #start_time = time.process_time()
     data = model.getArtworksRange(artworksdate,inicial,final)
     uniqueArtists = model.countUniqueArtists(data[0],data[1])
     purchasedArtworks = model.getPurchasedArtworks(data[0],data[1])
     getSix = model.getSixArtWorks(data[0],artists)
+    #stop_time = time.process_time()
+    #print((stop_time - start_time)*1000)
     return (getSix,data[1],uniqueArtists,purchasedArtworks)
 
 def obrasArtista(catalog, name):
-    start_time = time.process_time()
+    #start_time = time.process_time()
     info = model.onlyMapValue(catalog['names'], name)
     mapArtworks = model.artworksByArtist(catalog, info)
-    stop_time = time.process_time()
-    print((stop_time - start_time)*1000)
+    #stop_time = time.process_time()
+    #print((stop_time - start_time)*1000)
     return mapArtworks
 
 def masAntic(map, len, medium):
+    #start_time = time.process_time()
     sortArtworksByDate(map, medium)
     lst = model.getMapSubList(map,medium, len)
+    #stop_time = time.process_time()
+    #print((stop_time - start_time)*1000)
     for a in lst['elements']:
         print(a)
 
 def natRank(nats,artists):
+    #start_time = time.process_time()
     top10lst = model.top10lst(nats) 
     top10DataFrame = model.top10DataFrame(top10lst)
     topNat = model.getTopNationality(nats,top10lst,artists)
     topDataFrame = model.getSixArtWorks(topNat[2],artists)
+    #stop_time = time.process_time()
+    #print((stop_time - start_time)*1000)
     return (top10DataFrame,topDataFrame,topNat[0],topNat[1])
 
 def costoDepartamento(catalog, department):
+    #start_time = time.process_time()
     artworks = model.getArtworkByDep(catalog, department)
     to_print = model.getCost(artworks, catalog['artists'], department)
+    #stop_time = time.process_time()
+    #print((stop_time - start_time)*1000)
     return to_print
