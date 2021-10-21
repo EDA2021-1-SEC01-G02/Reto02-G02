@@ -1,8 +1,8 @@
 #ISIS1225 - Librerias de soporte
 
-Req 4 - Nicolas Perez Teran - n.perezt2@uniandes.edu.co - 202116903
+Req 3 - Nicolas Perez Teran - n.perezt2@uniandes.edu.co - 202116903
 
-Req 3 - Juan Pablo Rodríguez Briceño - jp.rodriguezb20@uniandes.edu.co - 202022764
+Req 4 - Juan Pablo Rodríguez Briceño - jp.rodriguezb20@uniandes.edu.co - 202022764
 
 
 
