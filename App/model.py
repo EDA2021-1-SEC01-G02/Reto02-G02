@@ -223,9 +223,9 @@ def top10lst (nationalities):
     for pos in range(lt.size(nats)+1): #Recorre nacionalidades
         nat = lt.getElement(nats,pos) #Obtiene una nacionalidad de la lista de nacionalidades
         temp = onlyMapValue(nationalities,nat) #Obtiene los valores de la nacionalidad
-        lt.addLast(data,{"Nacionalidad":nat,"Numero":lt.size(temp)})
-    ms.sort(data,cmpNationalitiesByArtworks)
-    result = lt.subList(data,1,10)
+        lt.addLast(data,{"Nacionalidad":nat,"Numero":lt.size(temp)}) #Agrega a la lista
+    ms.sort(data,cmpNationalitiesByArtworks) #Ordenara segun numero de obras
+    result = lt.subList(data,1,10) #"Recorta" para obtener los 10 primeros
     return result
 
 def top10DataFrame (lst):
@@ -255,20 +255,21 @@ def getRange(map, date1, date2):
 
 def getArtworksRange(map, date1, date2):
     """
-    Obtiene los artworks segun un rango de fechas #TODO: Arreglar para que funcione con fechas y no como numeros de ser posible
+    Obtiene los artworks segun un rango de fechas
     """
+    #Convierte las fechas a numeros seguidos, ignorando las separaciones -
     date1 = date1.replace("-","")
     date2 = date2.replace("-","")
 
     list = lt.newList('ARRAY_LIST', None)
-    for date in range(int(date1), int(date2)+1):
+    for date in range(int(date1), int(date2)+1): #Recorre entre las fechas
         date = str(date)
-        date = date[:4]+"-"+date[4:6]+"-"+date[6:8]
-        if mp.contains(map,date):
-            temp = onlyMapValue(map, date)
-            for pos in range(1, lt.size(onlyMapValue(map, date))+1 ):
-                lt.addLast(list, lt.getElement(temp, pos))
-    ms.sort(list, cmpArtworkByDateAdquired)
+        date = date[:4]+"-"+date[4:6]+"-"+date[6:8] #Lo mismo de borrar los -
+        if mp.contains(map,date): #Si el mapa tiene registro de la fecha
+            temp = onlyMapValue(map, date) #Saca la lista
+            for pos in range(1, lt.size(onlyMapValue(map, date))+1 ): #Recorre la lista por obras
+                lt.addLast(list, lt.getElement(temp, pos)) #Añade las obras a la lista
+    ms.sort(list, cmpArtworkByDateAdquired) #Organiza segun fecha
     return (list,lt.size(list))
 
 def countUniqueArtists(artworks,artworksSize):
@@ -276,14 +277,14 @@ def countUniqueArtists(artworks,artworksSize):
     Recorrera las obras en el rango y contara el numero de artistas. Solo una vez por artista
     """
 
-    temp = lt.newList('ARRAY_LIST', None)
+    temp = lt.newList('ARRAY_LIST', None) #Para almacenar las repeticiones de los artistas
     
-    for i in range(1,artworksSize+1):
-        artwork = lt.getElement(artworks,i)
-        artistsTemp = artwork['ConstituentID'].split(',')
-        for artist in artistsTemp:
-            artist = artist.strip().strip('[').strip(']')
-            lt.addLast(temp,artist)
+    for i in range(1,artworksSize+1): #Recorre la lista filtrada
+        artwork = lt.getElement(artworks,i) #Obtiene el artwork
+        artistsTemp = artwork['ConstituentID'].split(',') #Separa los artistas
+        for artist in artistsTemp: #Recorre artistas
+            artist = artist.strip().strip('[').strip(']') #Quitar caracteres que intervienen con la consulta
+            lt.addLast(temp,artist) #Añade artista
                 
     return lt.size(temp)
 
@@ -291,14 +292,14 @@ def getPurchasedArtworks(artworks,artworksSize):
     """
     Retorna la cantidad de obras que hayan sido compradas
     """
-    resultado = 0
+    resultado = 0 #Contador
 
-    for i in range(0,artworksSize+1):
-        artwork = lt.getElement(artworks,i)
-        artworkTemp = artwork['CreditLine'].lower()
-        artworkTemp = artworkTemp.split(' ')
-        if "purchase" in artworkTemp:
-            resultado += 1
+    for i in range(0,artworksSize+1): #Recorrer la lista de artworks filtrados
+        artwork = lt.getElement(artworks,i) #Obtiene el artwork
+        artworkTemp = artwork['CreditLine'].lower() #Pone todo en minusculas
+        artworkTemp = artworkTemp.split(' ') #Separa letra por letra
+        if "purchase" in artworkTemp: #Busca si purchase esta en este str
+            resultado += 1 #Si si, suma uno
     return resultado
 
 
@@ -320,16 +321,16 @@ def getSixArtWorks(list,artists):
     Saca los primeros 3 y los ultimos 3 elementos de la lista, usado en el requerimiento de obras por fecha y de nacionalidades 
     """
     size = lt.size(list)+1
-    dict = {}
-    for pos in range(1,4):
+    dict = {} #Diccionario que guardara los datos
+    for pos in range(1,4): #Primeros 3
+        temp = lt.getElement(list, pos) #Obtiene artwork
+        artistsTemp = getArtistsByCode(temp["ConstituentID"],artists) #Obtiene los nombres de los atristas segun los codigos
+        dict[pos] = temp['ObjectID'], temp['Title'], artistsTemp, temp['Medium'], temp['Date'], temp['Dimensions'], temp['Department'], temp['Classification'], temp['URL'] #Almacena los valores a mostrar del artwork
+    for pos in range(size-3, size): #Ultimos 3
         temp = lt.getElement(list, pos)
         artistsTemp = getArtistsByCode(temp["ConstituentID"],artists)
         dict[pos] = temp['ObjectID'], temp['Title'], artistsTemp, temp['Medium'], temp['Date'], temp['Dimensions'], temp['Department'], temp['Classification'], temp['URL']
-    for pos in range(size-3, size):
-        temp = lt.getElement(list, pos)
-        artistsTemp = getArtistsByCode(temp["ConstituentID"],artists)
-        dict[pos] = temp['ObjectID'], temp['Title'], artistsTemp, temp['Medium'], temp['Date'], temp['Dimensions'], temp['Department'], temp['Classification'], temp['URL']
-    to_print = pd.DataFrame.from_dict(dict, orient = 'index',columns=['ObjectID',"Title","ArtistsNames","Medium","Date","Dimensions","Department","Classification","URL"])
+    to_print = pd.DataFrame.from_dict(dict, orient = 'index',columns=['ObjectID',"Title","ArtistsNames","Medium","Date","Dimensions","Department","Classification","URL"]) #Creacion del dataframe para mostrar valores
     return to_print
 
 def artworksByArtist(catalog, info):
@@ -416,24 +417,24 @@ def getArtistNationality(artistid,artists):
     return result
 
 def getTopNationality(nationalities,topNats,artists):
-    topNat = lt.getElement(topNats,1)
-    topNat = topNat["Nacionalidad"]
-    topNum = 0
-    lst = onlyMapValue(nationalities,topNat)
-    for artwork in range(0,lt.size(lst)):
-        artwork = lt.getElement(lst,artwork)
-        unique = True
-        artistsID = artwork["ConstituentID"]
-        artistsID = artistsID.strip().strip('[').strip(']').replace(" ","")
-        artistsID = artistsID.split(",")
-        for artistID in artistsID:
-            artistInfo = onlyMapValue(artists,artistID)
-            if artistInfo["Nationality"] != topNat:
+    topNat = lt.getElement(topNats,1) #Obtiene la nacionalidad top
+    topNat = topNat["Nacionalidad"] #Saca el str
+    topNum = 0 #Contador
+    lst = onlyMapValue(nationalities,topNat) #Obtiene los artworks de la nacionalidad
+    for artwork in range(0,lt.size(lst)): #recorre
+        artwork = lt.getElement(lst,artwork) #Obtiene un artwork
+        unique = True #Verificador
+        artistsID = artwork["ConstituentID"] #Extrae los datos de los artistas
+        artistsID = artistsID.strip().strip('[').strip(']').replace(" ","") #Remueve caracteres
+        artistsID = artistsID.split(",") #Los separa
+        for artistID in artistsID: #Recorre artistas
+            artistInfo = onlyMapValue(artists,artistID) #Obtiene los datos del artista
+            if artistInfo["Nationality"] != topNat: #Si las nacionalidades de los artistas son distintos a la nacionalidad top, verificador se vuelve false
                 unique = False
-                break
-        if unique:
+                break #Saca del for para no tener que buscar mas
+        if unique: #Si las nacionalidades de todos los artistas coinciden con la nacionalidad top, contara uno mas a las obras
             topNum += 1
-    topLst = onlyMapValue(nationalities,topNat)
+    topLst = onlyMapValue(nationalities,topNat) #Obtiene los artworks de la nacionalidad
     return (topNat,topNum,topLst)
         
 
